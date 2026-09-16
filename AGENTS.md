@@ -22,6 +22,7 @@ ALWAYS refer to the relevant .md file BEFORE generating any code.
 | Document | Scope & Key Invariants |
 | :--- | :--- |
 | [`docs/auth.md`](docs/auth.md) | Clerk-only auth, modal triggers (`mode="modal"`), `/dashboard` route protection, `/` redirect, and tenant isolation |
+| [`docs/ui.md`](docs/ui.md) | Mandatory Shadcn UI exclusivity, zero custom components, CLI installation (`npx shadcn add`), and semantic tokens |
 
 ---
 
