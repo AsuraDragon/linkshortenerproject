@@ -32,7 +32,7 @@ export function Navbar() {
         <div className="flex items-center gap-3">
           <Show when="signed-out">
             <SignInButton mode="modal">
-              <Button variant="ghost" size="sm">
+              <Button variant="outline" size="sm">
                 Sign In
               </Button>
             </SignInButton>

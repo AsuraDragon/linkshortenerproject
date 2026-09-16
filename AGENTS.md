@@ -14,8 +14,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Welcome to the **LinkShortenerProject** codebase. This file serves as the primary constitution and entry point for LLMs and autonomous agents working on this project.
 
-To maintain modularity and high fidelity, detailed instructions, code standards, and domain-specific patterns are separated into dedicated Markdown documents inside the [`/docs`](docs/) directory.
-ALWAYS refer to the relevant .md file BEFORE generating any code.
+> [!CRITICAL]
+> ### 🛑 MANDATORY FIRST STEP: READ `/docs` BEFORE WRITING CODE
+> **BEFORE generating or modifying ANY code, you MUST inspect and thoroughly read the relevant domain instruction file(s) in [`/docs`](docs/).**
+> Do NOT guess conventions, do NOT rely on general assumptions, and do NOT write ad-hoc code. Every architectural domain (authentication, UI components, database operations, routing) has strict, non-negotiable invariants defined in its corresponding specification file in [`/docs`](docs/). Writing code without reading these specifications first is a direct rule violation.
 
 ### 📚 Architecture & Domain Documentation
 
@@ -26,9 +28,12 @@ ALWAYS refer to the relevant .md file BEFORE generating any code.
 
 ---
 
-## ⚡ The 5 Golden Rules for Agents
+## ⚡ The 6 Golden Rules for Agents
 
-1. **Async Request APIs (Next.js 16 Breaking Change):**
+1. **Mandatory Documentation Inspection (`/docs` Prerequisite):**
+    - **Never generate code blindly.** Before writing or modifying a single line of code, locate and read the relevant specification in [`/docs`](docs/) (e.g., [`docs/ui.md`](docs/ui.md) for any visual/styling task, [`docs/auth.md`](docs/auth.md) for session/route protection). Adhere strictly to all documented invariants.
+
+2. **Async Request APIs (Next.js 16 Breaking Change):**
     - Page and layout `params` and `searchParams` are `Promise` objects. **Always `await` them:**
         ```tsx
         export default async function Page({ params }: { params: Promise<{ code: string }> }) {
@@ -37,24 +42,24 @@ ALWAYS refer to the relevant .md file BEFORE generating any code.
         ```
     - Always `await cookies()` and `await headers()`.
 
-2. **Strictly Await Clerk `auth()`:**
+3. **Strictly Await Clerk `auth()`:**
     - In Next.js 15+, `auth()` from `@clerk/nextjs/server` is async. **Never call `auth()` without `await`**:
         ```ts
         const { userId } = await auth();
         ```
     - Never expose `CLERK_SECRET_KEY` in client-facing code or prefixes.
 
-3. **Mandatory Tenant Isolation in Database Queries:**
+4. **Mandatory Tenant Isolation in Database Queries:**
     - User-owned data (links, click logs) **MUST ALWAYS** be scoped by `userId` in queries:
         ```ts
         where(and(eq(links.id, linkId), eq(links.userId, userId)));
         ```
     - Never perform unauthenticated or unscoped updates/deletes on user links.
 
-4. **Preserve Next.js Agent Block:**
+5. **Preserve Next.js Agent Block:**
     - **DO NOT** edit, remove, or comment out the `<!-- BEGIN:nextjs-agent-rules --> ... <!-- END:nextjs-agent-rules -->` block at the top of this file. `next dev` will re-add it automatically.
 
-5. **Type Safety & Validation:**
+6. **Type Safety & Validation:**
     - No `any` types. Ensure all server actions and form inputs are validated using **Zod**.
     - Use the `@/*` import alias consistently across the application.
 
@@ -103,7 +108,7 @@ npx shadcn@latest add <component-name>
 
 When tasked with implementing a feature or fixing a bug:
 
-- [ ] Check [`docs/`](docs/) for the domain-specific standard before editing code.
+- [ ] **MANDATORY FIRST STEP**: Locate and read the relevant specification file(s) in [`docs/`](docs/) from top to bottom BEFORE generating or modifying ANY code.
 - [ ] Ensure Server Components are the default; use `"use client"` only for client interactivity.
 - [ ] Confirm authentication and tenant verification are enforced where applicable.
 - [ ] Verify there are no TypeScript errors or missing imports.
