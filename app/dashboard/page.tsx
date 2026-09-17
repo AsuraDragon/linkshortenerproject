@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { desc, eq } from "drizzle-orm";
 import { Calendar, Link2, Layers, Sparkles } from "lucide-react";
 import { db } from "@/db";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreateLinkDialog } from "@/components/create-link-dialog";
-import { DashboardLinksView } from "@/components/dashboard-links-view";
+import { DashboardLinksView, type ViewMode } from "@/components/dashboard-links-view";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -22,7 +22,12 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  // Next.js 16 async headers API
+  // Next.js 16 async cookies and headers APIs
+  const cookieStore = await cookies();
+  const rawView = cookieStore.get("dashboard_view_mode")?.value;
+  const initialView: ViewMode =
+    rawView === "wide" || rawView === "grid" ? rawView : "compact";
+
   const headersList = await headers();
   const host =
     headersList.get("x-forwarded-host") ||
@@ -141,7 +146,11 @@ export default async function DashboardPage() {
           </div>
         </Card>
       ) : (
-        <DashboardLinksView links={userLinks} baseUrl={baseUrl} />
+        <DashboardLinksView
+          links={userLinks}
+          baseUrl={baseUrl}
+          initialView={initialView}
+        />
       )}
     </div>
   );

@@ -31,11 +31,12 @@ import { CopyButton } from "@/components/copy-button";
 import { EditLinkDialog } from "@/components/edit-link-dialog";
 import { DeleteLinkDialog } from "@/components/delete-link-dialog";
 
-type ViewMode = "compact" | "wide" | "grid";
+export type ViewMode = "compact" | "wide" | "grid";
 
 interface DashboardLinksViewProps {
   links: Link[];
   baseUrl: string;
+  initialView?: ViewMode;
 }
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -44,22 +45,18 @@ const dateFormatter = new Intl.DateTimeFormat("en-US", {
   year: "numeric",
 });
 
-export function DashboardLinksView({ links, baseUrl }: DashboardLinksViewProps) {
-  const [viewMode, setViewMode] = useState<ViewMode>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("dashboard_view_mode") as ViewMode | null;
-      if (saved === "compact" || saved === "wide" || saved === "grid") {
-        return saved;
-      }
-    }
-    return "compact";
-  });
+export function DashboardLinksView({
+  links,
+  baseUrl,
+  initialView = "compact",
+}: DashboardLinksViewProps) {
+  const [viewMode, setViewMode] = useState<ViewMode>(initialView);
 
   const handleViewChange = (val: string) => {
     const mode = val as ViewMode;
     setViewMode(mode);
     try {
-      localStorage.setItem("dashboard_view_mode", mode);
+      document.cookie = `dashboard_view_mode=${mode}; path=/; max-age=31536000; SameSite=Lax`;
     } catch {
       // ignore
     }
