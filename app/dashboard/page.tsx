@@ -24,6 +24,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/copy-button";
 import { CreateLinkDialog } from "@/components/create-link-dialog";
+import { EditLinkDialog } from "@/components/edit-link-dialog";
+import { DeleteLinkDialog } from "@/components/delete-link-dialog";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -167,7 +169,7 @@ export default async function DashboardPage() {
                   <TableHead className="w-[220px]">Short Link</TableHead>
                   <TableHead>Original Destination</TableHead>
                   <TableHead className="w-[160px]">Last Updated</TableHead>
-                  <TableHead className="w-[140px] text-right">Actions</TableHead>
+                  <TableHead className="w-[180px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -210,7 +212,7 @@ export default async function DashboardPage() {
 
                       {/* Actions */}
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end gap-1">
                           <CopyButton text={fullShortUrl} />
                           <a
                             href={link.url}
@@ -227,6 +229,8 @@ export default async function DashboardPage() {
                               <ArrowUpRight className="size-4" />
                             </Button>
                           </a>
+                          <EditLinkDialog link={link} />
+                          <DeleteLinkDialog link={link} />
                         </div>
                       </TableCell>
                     </TableRow>
