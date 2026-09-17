@@ -23,6 +23,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/copy-button";
+import { CreateLinkDialog } from "@/components/create-link-dialog";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -40,12 +41,12 @@ export default async function DashboardPage() {
   const proto = headersList.get("x-forwarded-proto") || "http";
   const baseUrl = `${proto}://${host}`;
 
-  // Mandatory tenant-isolated query
+  // Mandatory tenant-isolated query ordered latest to oldest by updated at date
   const userLinks = await db
     .select()
     .from(links)
     .where(eq(links.userId, userId))
-    .orderBy(desc(links.createdAt));
+    .orderBy(desc(links.updatedAt));
 
   const latestLink = userLinks[0];
   const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -57,7 +58,7 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-8 px-4 py-8 sm:px-6">
       {/* Header Section */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2.5">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -70,6 +71,9 @@ export default async function DashboardPage() {
           <p className="mt-1 text-sm text-muted-foreground">
             Manage your shortened URLs, copy branded links, and inspect destinations.
           </p>
+        </div>
+        <div>
+          <CreateLinkDialog />
         </div>
       </div>
 
@@ -112,14 +116,14 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Latest Creation
+              Last Updated
             </CardTitle>
             <Calendar className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
               {latestLink
-                ? dateFormatter.format(new Date(latestLink.createdAt))
+                ? dateFormatter.format(new Date(latestLink.updatedAt))
                 : "None yet"}
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -139,6 +143,12 @@ export default async function DashboardPage() {
           <p className="mt-1.5 max-w-sm text-sm text-muted-foreground">
             You have not created any short links yet. Get started by shortening your first URL.
           </p>
+          <div className="mt-5">
+            <CreateLinkDialog
+              triggerText="Shorten your first link"
+              triggerSize="default"
+            />
+          </div>
         </Card>
       ) : (
         <Card>
@@ -156,7 +166,7 @@ export default async function DashboardPage() {
                 <TableRow>
                   <TableHead className="w-[220px]">Short Link</TableHead>
                   <TableHead>Original Destination</TableHead>
-                  <TableHead className="w-[160px]">Created</TableHead>
+                  <TableHead className="w-[160px]">Last Updated</TableHead>
                   <TableHead className="w-[140px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -190,11 +200,11 @@ export default async function DashboardPage() {
                         </div>
                       </TableCell>
 
-                      {/* Created Date */}
+                      {/* Updated Date */}
                       <TableCell className="text-xs text-muted-foreground">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="size-3.5 text-muted-foreground" />
-                          <span>{dateFormatter.format(new Date(link.createdAt))}</span>
+                          <span>{dateFormatter.format(new Date(link.updatedAt))}</span>
                         </div>
                       </TableCell>
 
