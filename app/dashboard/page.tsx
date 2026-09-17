@@ -2,30 +2,18 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { desc, eq } from "drizzle-orm";
-import { ArrowUpRight, Calendar, Globe, Link2, Layers, Sparkles } from "lucide-react";
+import { Calendar, Link2, Layers, Sparkles } from "lucide-react";
 import { db } from "@/db";
 import { links } from "@/db/schema";
 import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { CopyButton } from "@/components/copy-button";
 import { CreateLinkDialog } from "@/components/create-link-dialog";
-import { EditLinkDialog } from "@/components/edit-link-dialog";
-import { DeleteLinkDialog } from "@/components/delete-link-dialog";
+import { DashboardLinksView } from "@/components/dashboard-links-view";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -135,7 +123,7 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Links List / Table */}
+      {/* Links Presentation (Compact / Wide / Grid) */}
       {userLinks.length === 0 ? (
         <Card className="flex flex-col items-center justify-center p-12 text-center">
           <div className="flex size-12 items-center justify-center rounded-xl bg-muted text-muted-foreground">
@@ -153,93 +141,7 @@ export default async function DashboardPage() {
           </div>
         </Card>
       ) : (
-        <Card>
-          <CardHeader className="border-b border-border/50 pb-4">
-            <CardTitle className="text-base font-semibold text-foreground">
-              Your Shortened Links
-            </CardTitle>
-            <CardDescription>
-              All links created under your verified tenant account.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[220px]">Short Link</TableHead>
-                  <TableHead>Original Destination</TableHead>
-                  <TableHead className="w-[160px]">Last Updated</TableHead>
-                  <TableHead className="w-[180px] text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userLinks.map((link) => {
-                  const fullShortUrl = `${baseUrl}/${link.code}`;
-                  return (
-                    <TableRow key={link.id} className="group">
-                      {/* Short Link Code */}
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            variant="secondary"
-                            className="font-mono text-xs tracking-tight text-foreground"
-                          >
-                            /{link.code}
-                          </Badge>
-                        </div>
-                      </TableCell>
-
-                      {/* Destination URL */}
-                      <TableCell>
-                        <div className="flex max-w-md items-center gap-2">
-                          <Globe className="size-3.5 shrink-0 text-muted-foreground" />
-                          <span
-                            className="truncate text-xs font-mono text-muted-foreground transition-colors group-hover:text-foreground"
-                            title={link.url}
-                          >
-                            {link.url}
-                          </span>
-                        </div>
-                      </TableCell>
-
-                      {/* Updated Date */}
-                      <TableCell className="text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1.5">
-                          <Calendar className="size-3.5 text-muted-foreground" />
-                          <span>{dateFormatter.format(new Date(link.updatedAt))}</span>
-                        </div>
-                      </TableCell>
-
-                      {/* Actions */}
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-1">
-                          <CopyButton text={fullShortUrl} />
-                          <a
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            tabIndex={-1}
-                          >
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
-                              aria-label={`Open destination URL for ${link.code}`}
-                            >
-                              <ArrowUpRight className="size-4" />
-                            </Button>
-                          </a>
-                          <EditLinkDialog link={link} />
-                          <DeleteLinkDialog link={link} />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+        <DashboardLinksView links={userLinks} baseUrl={baseUrl} />
       )}
     </div>
   );
